@@ -1,0 +1,6 @@
+{
+    "token": "Insert your Discord bot token here",
+    "prefix": "Insert your command prefix here",
+    "ownerID": "Insert your Discord ID here",
+    "apiKey": "Insert your osu api key here"
+  }
