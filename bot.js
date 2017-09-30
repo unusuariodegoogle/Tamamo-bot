@@ -16,39 +16,39 @@ client.on("ready", () => {
 });
 
 client.on("message", (message) => {
-  //Ignorē ziņu, ja nesākas ar prefixu vai arī ja ziņas autors ir bots.
+  //Ignores message if the author of the message is a bot.
   if (!message.content.startsWith(config.prefix) || message.author.bot) return;
-  //Ignorē ziņu, ja tās autors nav jurrrgis vai waywern2012
 
   const prefix = config.prefix;
   let command = message.content.split(" ")[0];
   command = command.slice(prefix.length);
 
+  //A command that gives the user a specific role in my Discord server.
   if (command === "hello") {
     let author = 
     message.guild.member(message.author).addRole("361256307044646924").catch(console.error);
     return;
   }
-
+  //Ignores the message if the author of the message is not specified in the config file.
   if (message.author.id !== config.ownerID) {
     if (message.author.id !== config.waywernID) {
       return;
     }
   }
-
+  //A command for osu! score and country rank tracking.
   if (command === "check") {
     message.channel.send("Ah shit, here we go again... NotLikeThis");
     function check() {
       let osulink = fs.readJsonSync("./osulink.json");
-      console.log(`[${moment().format("HH:mm:ss")}] Sāku pārbaudīt scorus...`);
-      console.log(`[${moment().format("HH:mm:ss")}] Šī pārbaude aizņems aptuveni ${Math.round(osulink.length * 20 / 60)} minūtes!`);
+      console.log(`[${moment().format("HH:mm:ss")}] Starting to track scores`);
+      console.log(`[${moment().format("HH:mm:ss")}] This check will take about ${Math.round(osulink.length * 20 / 60)} minutes!`);
       for (let i in osulink) {
         setTimeout(function() {
         osuApi.getUser({u: osulink[i].osu_id})
         .then(user => {
           let LVRank = parseInt(user.pp.countryRank);
           console.log(`[${moment().format("HH:mm:ss")}] ${user.name} - #${LVRank} LV`);
-          console.log(`[${moment().format("HH:mm:ss")}] Pašlaik pārbaudu ${user.name} scorus...`);
+          console.log(`[${moment().format("HH:mm:ss")}] Currently checking scores of ${user.name}`);
            if (LVRank === 1) {
              message.guild.member(osulink[i].discord_id).addRole("202057149860282378").catch(console.error);
              setTimeout(() => {
@@ -185,7 +185,6 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
       }
       if (position > 0 && oldMember.hoistRole.name === "Restricted") {
         const channel = newMember.guild.channels.find("name", "botspam");
-        //const channel = newMember.guild.channels.find("name", "playground");
         console.log(`[${moment().format("HH:mm:ss")}] ${newMember.user.username} tika unrestricots! :)`)
         channel.send(new Discord.RichEmbed()
         .setAuthor(newMember.user.username, newMember.user.avatarURL)
@@ -196,7 +195,6 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
       }
       if (position > 0 && newMember.hoistRole.name === "#1 LV") {
         const channel = newMember.guild.channels.find("name", "botspam");
-        //const channel = newMember.guild.channels.find("name", "playground");
         console.log(`[${moment().format("HH:mm:ss")}] ${newMember.user.username} pakāpās uz ${newMember.hoistRole.name} grupu!`);
         channel.send(new Discord.RichEmbed()
         .setAuthor(newMember.user.username, newMember.user.avatarURL)
@@ -207,7 +205,6 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
       }
       if (position > 0) {
         const channel = newMember.guild.channels.find("name", "botspam");
-        //const channel = newMember.guild.channels.find("name", "playground");
         console.log(`[${moment().format("HH:mm:ss")}] ${newMember.user.username} pakāpās uz ${newMember.hoistRole.name} grupu!`);
         channel.send(new Discord.RichEmbed()
         .setAuthor(newMember.user.username, newMember.user.avatarURL)
@@ -218,7 +215,6 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
       }
       if (position < 0) {
         const channel = newMember.guild.channels.find("name", "botspam");
-        //const channel = newMember.guild.channels.find("name", "playground");
         console.log(`[${moment().format("HH:mm:ss")}] ${newMember.user.username} nokritās uz ${newMember.hoistRole.name} grupu!`);
         channel.send(new Discord.RichEmbed()
         .setAuthor(newMember.user.username, newMember.user.avatarURL)
@@ -234,7 +230,6 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
   } 
   evilAngel();
 });
-
 client.on("presenceUpdate", (oldMember, newMember) => {
   try {
     if (newMember.presence.game.name === "owo") {
