@@ -159,7 +159,7 @@ client.on("message", (message) => {
     return;
   }
   if (command === "desa") {
-    return message.channel.send("Man garšo desa?");
+    return message.channel.send("Man garšo desa!");
   }
   if (command === "link") {
     let [discord_user, osu_id, note] = message.content.split(/\s+/g).slice(1);
