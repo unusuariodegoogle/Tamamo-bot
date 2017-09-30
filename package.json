@@ -1,0 +1,26 @@
+{
+  "name": "tamamobot",
+  "version": "1.0.0",
+  "description": "Worst discord bot ever witnessed by humanity",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jurrrgis",
+  "license": "ISC",
+  "dependencies": {
+    "bufferutil": "^3.0.2",
+    "discord.js": "^11.2.0",
+    "eslint": "^4.3.0",
+    "fs-extra": "^4.0.1",
+    "guild": "^1.2.2",
+    "moment": "^2.18.1",
+    "node-osu": "^1.2.0",
+    "nodesu": "^0.6.2",
+    "uws": "^8.14.0"
+  },
+  "devDependencies": {
+    "eslint-config-airbnb-base": "^11.3.1",
+    "eslint-plugin-import": "^2.7.0"
+  }
+}
