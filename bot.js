@@ -263,3 +263,68 @@ client.on("presenceUpdate", (oldMember, newMember) => {
     }
   }
 });
+
+//Announcements for users getting banned/unbanned from the server and joining/leaving the server
+client.on("guildBanAdd", (guild, user) => {
+  console.log(`[${moment().format("HH:mm:ss")}] ${user.username} has been banned from the ${guild.name} server!`)
+  let channel = guild.channels.find("name", "botspam");
+  try {
+    channel.send(`**${user.username}** tika nobanots no šī servera!`);
+  }
+  catch (error) {
+    if (error.message === "Cannot read property 'send' of null") {
+      return;
+    }
+    else {
+      console.log(error);
+    }
+  }
+});
+
+client.on("guildBanRemove", (guild, user) => {
+  console.log(`[${moment().format("HH:mm:ss")}] has been unbanned from the ${guild.name} server`)
+  let channel = guild.channels.find("name", "botspam");
+  try {
+    channel.send(`**${user.username}** tika unbanots no šī servera!`)
+  }
+  catch (error) {
+    if (error.message === "Cannot read property 'send' of null") {
+      return;
+    }
+    else {
+      console.log(error);
+    }
+  }
+});
+
+client.on("guildMemberAdd", (member) => {
+  console.log(`[${moment().format("HH:mm:ss")}] ${member.user.username} joined the ${member.guild.name} server!`);
+  let channel = member.guild.channels.find("name", "botspam");
+  try {
+    channel.send(`${member.user} pievienojās serverim!`);
+  }
+  catch (error) {
+    if (error.message === "Cannot read property 'send' of null") {
+      return;
+    }
+    else {
+      console.log(error);
+    }
+  }
+});
+
+client.on("guildMemberRemove", (member) => {
+  console.log(`[${moment().format("HH:mm:ss")}] ${member.user.username} has left the ${member.guild.name} server!`);
+  let channel = member.guild.channels.find("name", "botspam");
+  try {
+    channel.send(`**${member.user.username}** pameta šo serveri vai tika kickots!`);
+  }
+  catch (error) {
+    if (error.message === "Cannot read property 'send' of null") {
+      return;
+    }
+    else {
+      console.log(error);
+    }
+  }
+});
