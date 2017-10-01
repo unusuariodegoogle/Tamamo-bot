@@ -16,7 +16,7 @@ client.on("ready", () => {
 });
 
 client.on("message", (message) => {
-  //Ignores message if the author of the message is a bot.
+  //Ignores message if the message doesn't start with a prefix or message author is a bot.
   if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
   const prefix = config.prefix;
@@ -29,7 +29,7 @@ client.on("message", (message) => {
     message.guild.member(message.author).addRole("361256307044646924").catch(console.error);
     return;
   }
-  //Ignores the message if the author of the message is not specified in the config file.
+  //Ignores the commands below if the author of the message is not allowed to use the command.
   if (message.author.id !== config.ownerID) {
     if (message.author.id !== config.waywernID) {
       return;
@@ -158,9 +158,11 @@ client.on("message", (message) => {
     check();
     return;
   }
+  //Desa
   if (command === "desa") {
     return message.channel.send("Man garšo desa!");
   }
+  //A command to add a new user to osulink.json file, basically linking together osu! and Discord profiles.
   if (command === "link") {
     let [discord_user, osu_id, note] = message.content.split(/\s+/g).slice(1);
     let discord_id = discord_user.replace(/\D/g,'');
@@ -170,12 +172,13 @@ client.on("message", (message) => {
       json.push({discord_id: discord_id, osu_id: osu_id, note: note});
       fs.writeFile("./osulink.json", JSON.stringify(json, null, 2));
     })
-    message.channel.send("Lietotājs pievienots datubāzei!")
-    console.log(`[${moment().format("HH:mm:ss")}] ${message.author.username} pievienoja jaunu lietotāju: discord_id - ${discord_id} osu_id -  ${osu_id} note - ${note}`);
+    message.channel.send("User has been added to the database!")
+    console.log(`[${moment().format("HH:mm:ss")}] ${message.author.username} added a new user: discord_id - ${discord_id} osu_id -  ${osu_id} note - ${note}`);
     return;
   }
 });
 
+//Announcements when user's country rank group changes.
 client.on("guildMemberUpdate", (oldMember, newMember) => {
   function evilAngel() {
     try {
@@ -184,7 +187,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
         return;
       }
       if (position > 0 && oldMember.hoistRole.name === "Restricted") {
-        const channel = newMember.guild.channels.find("name", "botspam");
+        let channel = newMember.guild.channels.find("name", "botspam");
         console.log(`[${moment().format("HH:mm:ss")}] ${newMember.user.username} tika unrestricots! :)`)
         channel.send(new Discord.RichEmbed()
         .setAuthor(newMember.user.username, newMember.user.avatarURL)
@@ -194,7 +197,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
         return;
       }
       if (position > 0 && newMember.hoistRole.name === "#1 LV") {
-        const channel = newMember.guild.channels.find("name", "botspam");
+        let channel = newMember.guild.channels.find("name", "botspam");
         console.log(`[${moment().format("HH:mm:ss")}] ${newMember.user.username} pakāpās uz ${newMember.hoistRole.name} grupu!`);
         channel.send(new Discord.RichEmbed()
         .setAuthor(newMember.user.username, newMember.user.avatarURL)
@@ -204,7 +207,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
         return;
       }
       if (position > 0) {
-        const channel = newMember.guild.channels.find("name", "botspam");
+        let channel = newMember.guild.channels.find("name", "botspam");
         console.log(`[${moment().format("HH:mm:ss")}] ${newMember.user.username} pakāpās uz ${newMember.hoistRole.name} grupu!`);
         channel.send(new Discord.RichEmbed()
         .setAuthor(newMember.user.username, newMember.user.avatarURL)
@@ -214,7 +217,7 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
         return;
       }
       if (position < 0) {
-        const channel = newMember.guild.channels.find("name", "botspam");
+        let channel = newMember.guild.channels.find("name", "botspam");
         console.log(`[${moment().format("HH:mm:ss")}] ${newMember.user.username} nokritās uz ${newMember.hoistRole.name} grupu!`);
         channel.send(new Discord.RichEmbed()
         .setAuthor(newMember.user.username, newMember.user.avatarURL)
@@ -230,6 +233,8 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
   } 
   evilAngel();
 });
+
+//Gives user a specific role on my Discord server if the user sets the currently running game in Discord as "owo"
 client.on("presenceUpdate", (oldMember, newMember) => {
   try {
     if (newMember.presence.game.name === "owo") {
@@ -242,13 +247,14 @@ client.on("presenceUpdate", (oldMember, newMember) => {
           console.log(error);
         }
       });
-      console.log(`[${moment().format("HH:mm:ss")}] ${newMember.user.username} tika pievienots owo role!`);
+      console.log(`[${moment().format("HH:mm:ss")}] "owo" role has been added to ${newMember.user.username}`);
     }
     else {
       return;
     }
   }
   catch (error) {
+    //Ignores the error which occurs when user stops playing a game.
     if (error.message === "Cannot read property 'name' of null") {
       return;
     }
