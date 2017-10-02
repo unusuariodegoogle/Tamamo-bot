@@ -16,7 +16,6 @@
     "guild": "^1.2.2",
     "moment": "^2.18.1",
     "node-osu": "^1.2.0",
-    "nodesu": "^0.6.2",
     "uws": "^8.14.0"
   },
   "devDependencies": {
