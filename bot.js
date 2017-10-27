@@ -25,7 +25,6 @@ client.on("message", (message) => {
 
   //A command that gives the user a specific role in my Discord server.
   if (command === "hello") {
-    let author = 
     message.guild.member(message.author).addRole("361256307044646924").catch(console.error);
     return;
   }
