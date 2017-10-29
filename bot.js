@@ -97,7 +97,7 @@ client.on("message", (message) => {
           .then(scores => {
             for (let q in scores) {
               let time = scores[q].raw_date;
-              let editedTime = moment(time).subtract(5, "h").format("YYYY-MM-DD HH:mm:ss");
+              let editedTime = moment(time).subtract(6, "h").format("YYYY-MM-DD HH:mm:ss");
               let diff = moment().diff(editedTime);
               let z = parseInt(q);
               if (diff <= 3600000) {
