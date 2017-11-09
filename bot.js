@@ -1,7 +1,6 @@
 const Discord = require("discord.js");
 const osu = require("node-osu");
 const moment = require("moment");
-const moment_tz = require("moment-timezone");
 const config = require("./config.json");
 const fs = require("fs");
 const move_decimal = require("move-decimal-point");
