@@ -1,8 +1,9 @@
 const Discord = require("discord.js");
 const osu = require("node-osu");
 const moment = require("moment");
+const moment_tz = require("moment-timezone");
 const config = require("./config.json");
-const fs = require("fs-extra");
+const fs = require("fs");
 const move_decimal = require("move-decimal-point");
 
 const client = new Discord.Client();
@@ -16,29 +17,26 @@ client.on("ready", () => {
 });
 
 client.on("message", (message) => {
-  //Ignores message if the message doesn't start with a prefix or message author is a bot.
   if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
   const prefix = config.prefix;
   let command = message.content.split(" ")[0];
   command = command.slice(prefix.length);
 
-  //A command that gives the user a specific role in my Discord server.
   if (command === "hello") {
     message.guild.member(message.author).addRole("361256307044646924").catch(console.error);
     return;
   }
-  //Ignores the commands below if the author of the message is not allowed to use the command.
   if (message.author.id !== config.ownerID) {
     if (message.author.id !== config.waywernID) {
       return;
     }
   }
-  //A command for osu! score and country rank tracking.
   if (command === "check") {
     message.channel.send("Ah shit, here we go again... NotLikeThis");
     function check() {
-      let osulink = fs.readJsonSync("./osulink.json");
+      let parse = fs.readFileSync("./osulink.json");
+      let osulink = JSON.parse(parse);
       console.log(`[${moment().format("HH:mm:ss")}] Starting to track scores`);
       console.log(`[${moment().format("HH:mm:ss")}] This check will take about ${Math.round(osulink.length * 20 / 60)} minutes!`);
       for (let i in osulink) {
@@ -131,7 +129,7 @@ client.on("message", (message) => {
                     .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
                     .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
                     .setDescription(`__**${pp}pp |** #${z + 1} personal best__\n #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp\n x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${scores[q].rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod\n [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})\n ${minutes}:${seconds} **|** ${beatmaps[0].bpm} BPM **|** ★**${muhdiff}**`)
-                    .setFooter(`Pirms ${min} minūtēm un ${sec} sekundēm`)
+                    .setFooter(`Pirms ${min} minūtēm un ${sec} sekundēm ${moment(editedTime).format("HH:mm DD/MM/YYYY")}`)
                     ).catch(console.error);
                     }
                   else {
@@ -139,7 +137,7 @@ client.on("message", (message) => {
                     .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
                     .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
                     .setDescription(`__**${pp}pp |** #${z + 1} personal best__\n #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp\n x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${scores[q].rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}\n [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})\n ${minutes}:${seconds} **|** ${beatmaps[0].bpm} BPM **|** ★**${muhdiff}**`)
-                    .setFooter(`Pirms ${min} minūtēm un ${sec} sekundēm`)
+                    .setFooter(`Pirms ${min} minūtēm un ${sec} sekundēm ${moment(editedTime).format("HH:mm DD/MM/YYYY")}`)
                     ).catch(console.error);
                   }
                 })
@@ -157,11 +155,9 @@ client.on("message", (message) => {
     check();
     return;
   }
-  //Desa
   if (command === "desa") {
     return message.channel.send("Man garšo desa!");
   }
-  //A command to add a new user to osulink.json file, basically linking together osu! and Discord profiles.
   if (command === "link") {
     let [discord_user, osu_id, note] = message.content.split(/\s+/g).slice(1);
     let discord_id = discord_user.replace(/\D/g,'');
@@ -171,13 +167,12 @@ client.on("message", (message) => {
       json.push({discord_id: discord_id, osu_id: osu_id, note: note});
       fs.writeFile("./osulink.json", JSON.stringify(json, null, 2));
     })
-    message.channel.send("User has been added to the database!")
+    message.channel.send("Lietotājs tika pievienots datubāzei!")
     console.log(`[${moment().format("HH:mm:ss")}] ${message.author.username} added a new user: discord_id - ${discord_id} osu_id -  ${osu_id} note - ${note}`);
     return;
   }
 });
 
-//Announcements when user's country rank group changes.
 client.on("guildMemberUpdate", (oldMember, newMember) => {
   function evilAngel() {
     try {
@@ -233,7 +228,6 @@ client.on("guildMemberUpdate", (oldMember, newMember) => {
   evilAngel();
 });
 
-//Gives user a specific role on my Discord server if the user sets the currently running game in Discord as "owo"
 client.on("presenceUpdate", (oldMember, newMember) => {
   try {
     if (newMember.presence.game.name === "owo") {
@@ -253,7 +247,6 @@ client.on("presenceUpdate", (oldMember, newMember) => {
     }
   }
   catch (error) {
-    //Ignores the error which occurs when user stops playing a game.
     if (error.message === "Cannot read property 'name' of null") {
       return;
     }
@@ -263,7 +256,6 @@ client.on("presenceUpdate", (oldMember, newMember) => {
   }
 });
 
-//Announcements for users getting banned/unbanned from the server and joining/leaving the server
 client.on("guildBanAdd", (guild, user) => {
   console.log(`[${moment().format("HH:mm:ss")}] ${user.username} has been banned from the ${guild.name} server!`)
   let channel = guild.channels.find("name", "botspam");
