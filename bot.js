@@ -97,7 +97,7 @@ client.on("message", (message) => {
               let editedTime = moment(time).subtract(6, "h").format("YYYY-MM-DD HH:mm:ss");
               let diff = moment().diff(editedTime);
               let z = parseInt(q);
-              if (diff <= 300000) {
+              if (diff <= 600000) {
                 osuApi.getBeatmaps({b: scores[q].beatmapId})
                 .then(beatmaps => {
                   let minutes = Math.floor(beatmaps[0].time.total / 60);
@@ -147,10 +147,10 @@ client.on("message", (message) => {
           .catch(console.error);
         })
         .catch(console.error);
-      }, i * 2000);
+      }, i * 4000);
       }
     }
-    setInterval(check, 300000);
+    setInterval(check, 600000);
     check();
     return;
   }
