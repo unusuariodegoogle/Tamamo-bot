@@ -37,7 +37,7 @@ client.on("message", (message) => {
       let parse = fs.readFileSync("./osulink.json");
       let osulink = JSON.parse(parse);
       console.log(`[${moment().format("HH:mm:ss")}] Starting to track scores`);
-      console.log(`[${moment().format("HH:mm:ss")}] This check will take about ${Math.round(osulink.length * 2 / 60)} minutes!`);
+      console.log(`[${moment().format("HH:mm:ss")}] This check will take about ${Math.round(osulink.length * 4 / 60)} minutes!`);
       for (let i in osulink) {
         setTimeout(function() {
         osuApi.getUser({u: osulink[i].osu_id})
