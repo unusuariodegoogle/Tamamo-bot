@@ -51,44 +51,41 @@ client.on("message", (message) => {
              message.guild.member(osulink[i].discord_id).removeRoles(["202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
              }, 2000);
            }
-           else if (LVRank > 1 && LVRank <= 5) {
+           else if (LVRank <= 5) {
              message.guild.member(osulink[i].discord_id).addRole("202061474213003265").catch(console.error);
              setTimeout(() => {
              message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
              }, 2000);
            }
-           else if (LVRank > 5 && LVRank <= 10) {
+           else if (LVRank <= 10) {
              message.guild.member(osulink[i].discord_id).addRole("202061507037495296").catch(console.error);
              setTimeout(() => {
              message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
              }, 2000);
            }
-           else if (LVRank > 10 && LVRank <= 25) {
+           else if (LVRank <= 25) {
              message.guild.member(osulink[i].discord_id).addRole("202061546787045377").catch(console.error);
              setTimeout(() => {
              message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
              }, 2000);
            }
-           else if (LVRank > 25 && LVRank <= 50) {
+           else if (LVRank <= 50) {
              message.guild.member(osulink[i].discord_id).addRole("202061582006485002").catch(console.error);
              setTimeout(() => {
              message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
              }, 2000);
            }
-           else if (LVRank > 50 && LVRank <= 100) {
+           else if (LVRank <= 100) {
              message.guild.member(osulink[i].discord_id).addRole("202061613644251136").catch(console.error);
              setTimeout(() => {
              message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "297854952435351552", "348195423841943564"]).catch(console.error);
              }, 2000);
            }
-           else if (LVRank > 100) {
-             message.guild.member(osulink[i].discord_id).addRole("297854952435351552").catch(console.error);
-             setTimeout(() => {
-             message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "348195423841943564"]).catch(console.error);
-             }, 2000);
-           }
            else {
-             console.log("dunno");
+            message.guild.member(osulink[i].discord_id).addRole("297854952435351552").catch(console.error);
+            setTimeout(() => {
+            message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "348195423841943564"]).catch(console.error);
+            }, 2000);
            }
           osuApi.getUserBest({u: osulink[i].osu_id, limit: 25})
           .then(scores => {
