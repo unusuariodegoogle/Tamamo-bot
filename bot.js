@@ -173,6 +173,10 @@ client.on("message", (message) => {
                   var laiks = `${m}:${s} (${m2}:${s2})`;
                 }
                 else {
+                  var bpm = beatmaps[0].bpm;
+                  let m = Math.floor((beatmaps[0].time.total) / 60);
+                  let s = Math.floor(beatmaps[0].time.total) % 60;
+                  var laiks = `${m}:${s}`;
                 }
       
                 const channel = message.guild.channels.find("name", "botspam");
