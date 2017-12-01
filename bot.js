@@ -210,7 +210,7 @@ client.on("message", (message) => {
 x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod
 [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
 ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
-                .setFooter(`Pirms ${min} minūtēm un ${sec} sekundēm ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
+                .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
                 ).catch(console.error);
                 }
               else {
