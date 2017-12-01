@@ -205,8 +205,8 @@ client.on("message", (message) => {
                 channel.send(new Discord.RichEmbed()
                 .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
                 .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-                .setDescription(`__**${pp}pp |** #${z + 1} personal best__
-#${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp **|** max - top ${limits}
+                .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__ 
+#${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
 x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod
 [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
 ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
@@ -217,7 +217,7 @@ ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
                 channel.send(new Discord.RichEmbed()
                 .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
                 .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-                .setDescription(`__**${pp}pp |** #${z + 1} personal best__
+                .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__
 #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
 x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
 [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
