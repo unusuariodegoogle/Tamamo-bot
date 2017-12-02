@@ -32,198 +32,8 @@ client.on("message", (message) => {
     }
   }
   if (command === "check") {
-    message.channel.send("Ah shit, here we go again... NotLikeThis");
-    function check() {
-      let parse = fs.readFileSync("./osulink.json");
-      let osulink = JSON.parse(parse);
-      console.log(`[${moment().format("HH:mm:ss")}] Sāku pārbaudīt scorus...`);
-      console.log(`[${moment().format("HH:mm:ss")}] Šī pārbaude aizņems aptuveni ${Math.round(osulink.length * 4 / 60)} minūtes!`);
-      for (let i in osulink) {
-        setTimeout(function() {
-        osuApi.getUser({u: osulink[i].osu_id})
-        .then(user => {
-          let LVRank = parseInt(user.pp.countryRank);
-          console.log(`[${moment().format("HH:mm:ss")}] ${user.name} - #${LVRank} LV`);
-          console.log(`[${moment().format("HH:mm:ss")}] Currently checking scores of ${user.name}`);
-           if (LVRank === 1) {
-            message.guild.member(osulink[i].discord_id).addRole("202057149860282378").catch(console.error);
-            setTimeout(() => {
-            message.guild.member(osulink[i].discord_id).removeRoles(["202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
-            }, 2000);
-            var limits = 100;
-           }
-           else if (LVRank <= 5) {
-            message.guild.member(osulink[i].discord_id).addRole("202061474213003265").catch(console.error);
-            setTimeout(() => {
-            message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
-            }, 2000);
-            var limits = 75;
-           }
-           else if (LVRank <= 10) {
-            message.guild.member(osulink[i].discord_id).addRole("202061507037495296").catch(console.error);
-            setTimeout(() => {
-            message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
-            }, 2000);
-            var limits = 50;
-           }
-           else if (LVRank <= 25) {
-            message.guild.member(osulink[i].discord_id).addRole("202061546787045377").catch(console.error);
-            setTimeout(() => {
-            message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
-            }, 2000);
-            var limits = 40;
-           }
-           else if (LVRank <= 50) {
-            message.guild.member(osulink[i].discord_id).addRole("202061582006485002").catch(console.error);
-            setTimeout(() => {
-            message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
-            }, 2000);
-            var limits = 30;
-           }
-           else if (LVRank <= 100) {
-            message.guild.member(osulink[i].discord_id).addRole("202061613644251136").catch(console.error);
-            setTimeout(() => {
-            message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "297854952435351552", "348195423841943564"]).catch(console.error);
-            }, 2000);
-            var limits = 20;
-           }
-           else {
-            message.guild.member(osulink[i].discord_id).addRole("297854952435351552").catch(console.error);
-            setTimeout(() => {
-            message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "348195423841943564"]).catch(console.error);
-            }, 2000);
-            var limits = 10;
-           }
-          osuApi.getUserBest({u: osulink[i].osu_id, limit: limits})
-          .then(scores => {
-          for (let q in scores) {
-            let scoreTime = scores[q].raw_date;
-            let osuTime = moment_tz.tz(scoreTime, "Australia/Perth");
-            let latvianTime = osuTime.clone().tz("Europe/Riga").format("YYYY-MM-DD HH:mm:ss");
-            let difference = moment().diff(latvianTime);
-            let z = parseInt(q);
-            if (difference <= 600000) {
-            osuApi.getBeatmaps({b: scores[q].beatmapId})
-            .then(beatmaps => {
-              if (scores[q].rank === "SS" || scores[q].rank === "S" || scores[q].rank === "SH" || scores[q].rank === "SSH"){
-                var rank = scores[q].rank;
-              }
-              else {
-                if (scores[q].counts.miss === "1"){
-                  console.log(scores[q].counts.miss);
-                  var rank = `${scores[q].rank} ${scores[q].counts.miss}x miss`
-                }
-                else {
-                  var rank = `${scores[q].rank} ${scores[q].counts.miss}x misses`;
-                  console.log(scores[q].counts.miss);
-                }
-              }
-              let difficulty = Math.round(beatmaps[0].difficulty.rating * 100) / 100;
-    
-              let tris = parseInt(scores[q].counts["300"]);
-              let simts = parseInt(scores[q].counts["100"]);
-              let piecdesmit = parseInt(scores[q].counts["50"]);
-              let miss = parseInt(scores[q].counts.miss);
-              let points = (piecdesmit * 50) + (simts * 100) + (tris * 300);
-              let hits = miss + piecdesmit + simts + tris;
-              let formula = points / (hits * 300);
-              let komats = formula * 100;
-              let accuracy = Math.round(komats * 100) / 100;
-    
-              let pp = Math.round(scores[q].pp * 100) / 100;
-              let totalpp = Math.round(user.pp.raw * 100) / 100;
-              
-              let min = Math.floor(difference / 60000);
-              let sec = ((difference % 60000) / 1000).toFixed(0);
-
-              if (min === 1 && sec === 1) {
-                let delay = `Pirms ${min} minūtes un ${sec} sekundes`;
-              }
-              else if (min === 1 && sec != 1) {
-                let delay = `Pirms ${min} minūtes un ${sec} sekundēm`;
-              }
-              else if (min != 1 && sec === 1)  {
-                let delay = `Pirms ${min} minūtēm un ${sec} sekundes`
-              }
-              else {
-                let delay = `Pirms ${min} minūtēm un ${sec} sekundēm`;
-              }
-    
-              let mods = scores[q].mods.join("");
-          
-              for (k in scores[q].mods) {
-                if (scores[q].mods[k] === "DT") {
-                  var dt = true;
-                }
-                else if (scores[q].mods[k] === "HT") {
-                  var ht = true;
-                }
-              }
-              if (dt === true) {
-                var bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 1.5)})`
-                let m = Math.floor((beatmaps[0].time.total) / 60);
-                let sf = Math.floor(beatmaps[0].time.total) % 60;
-                let s = ("0" + sf).slice(-2);
-                let m2 = Math.floor((beatmaps[0].time.total * (2/3)) / 60);
-                let s2f = Math.floor((beatmaps[0].time.total * (2/3)) % 60);
-                let s2 = ("0" + s2f).slice(-2);
-                var laiks = `${m}:${s} (${m2}:${s2})`;
-              }
-              else if (ht === true) {
-                var bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 0.75)})`
-                let m = Math.floor((beatmaps[0].time.total) / 60);
-                let sf = Math.floor(beatmaps[0].time.total) % 60;
-                let s = ("0" + sf).slice(-2);
-                let m2 = Math.floor((beatmaps[0].time.total * (4/3)) / 60);
-                let s2f = Math.floor((beatmaps[0].time.total * (4/3)) % 60);
-                let s2 = ("0" + s2f).slice(-2);
-                var laiks = `${m}:${s} (${m2}:${s2})`;
-              }
-              else {
-                var bpm = beatmaps[0].bpm;
-                let m = Math.floor((beatmaps[0].time.total) / 60);
-                let sf = Math.floor(beatmaps[0].time.total) % 60;
-                let s = ("0" + sf).slice(-2);
-                var laiks = `${m}:${s}`;
-              }
-    
-              const channel = message.guild.channels.find("name", "botspam");
-              //const channel = message.guild.channels.find("name", "playground");
-    
-              if (scores[q].mods[0] === undefined) {
-                channel.send(new Discord.RichEmbed()
-                .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
-                .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-                .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__ 
-#${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
-x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod
-[${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
-${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
-                .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
-                ).catch(console.error);
-                }
-              else {
-                channel.send(new Discord.RichEmbed()
-                .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
-                .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-                .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__
-#${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
-x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
-[${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
-${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
-                .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
-                  ).catch(console.error);
-                  }
-                }).catch(console.error);
-              }
-            }
-          }).catch(console.error);
-        }).catch(console.error);
-      }, i * 4000);
-      }
-    }
-    setInterval(check, 600000);
-    check();
+    setInterval(main, 600000);
+    main();
     return;
   }
   if (command === "desa") {
@@ -390,3 +200,229 @@ client.on("guildMemberRemove", (member) => {
     }
   }
 });
+
+function main() {
+  message.channel.send("Jebal mazaa");
+  let parse = fs.readFileSync("./osulink.json");
+  let osulink = JSON.parse(parse);
+  console.log(`[${moment().format("HH:mm:ss")}] Sāku pārbaudīt scorus...`);
+  console.log(`[${moment().format("HH:mm:ss")}] Šī pārbaude aizņems aptuveni ${Math.round(osulink.length * 4 / 60)} minūtes!`);
+  for (let i in osulink) {
+    setInterval(checkRank, 4000);
+    checkRank();
+  }
+}
+function checkRank() {
+  osuApi.getUser({u: osulink[i].osu_id})
+  .then(user => {
+    let LVRank = parseInt(user.pp.countryRank);
+    console.log(`[${moment().format("HH:mm:ss")}] ${user.name} - #${LVRank} LV`);
+    console.log(`[${moment().format("HH:mm:ss")}] Pašlaik pārbaudu ${user.name} scorus!`);
+    if (LVRank === 1) {
+      message.guild.member(osulink[i].discord_id).addRole("202057149860282378").catch(console.error);
+      setTimeout(() => {
+      message.guild.member(osulink[i].discord_id).removeRoles(["202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
+      }, 2000);
+      let limits = 100;
+      checkUserBest();
+     }
+     else if (LVRank <= 5) {
+      message.guild.member(osulink[i].discord_id).addRole("202061474213003265").catch(console.error);
+      setTimeout(() => {
+      message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
+      }, 2000);
+      let limits = 75;
+      checkUserBest();
+     }
+     else if (LVRank <= 10) {
+      message.guild.member(osulink[i].discord_id).addRole("202061507037495296").catch(console.error);
+      setTimeout(() => {
+      message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
+      }, 2000);
+      let limits = 50;
+      checkUserBest();
+     }
+     else if (LVRank <= 25) {
+      message.guild.member(osulink[i].discord_id).addRole("202061546787045377").catch(console.error);
+      setTimeout(() => {
+      message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
+      }, 2000);
+      let limits = 40;
+      checkUserBest();
+     }
+     else if (LVRank <= 50) {
+      message.guild.member(osulink[i].discord_id).addRole("202061582006485002").catch(console.error);
+      setTimeout(() => {
+      message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
+      }, 2000);
+      let limits = 30;
+      checkUserBest();
+     }
+     else if (LVRank <= 100) {
+      message.guild.member(osulink[i].discord_id).addRole("202061613644251136").catch(console.error);
+      setTimeout(() => {
+      message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "297854952435351552", "348195423841943564"]).catch(console.error);
+      }, 2000);
+      let limits = 20;
+      checkUserBest();
+     }
+     else {
+      message.guild.member(osulink[i].discord_id).addRole("297854952435351552").catch(console.error);
+      setTimeout(() => {
+      message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "348195423841943564"]).catch(console.error);
+      }, 2000);
+      let limits = 10;
+      checkUserBest();
+     }
+
+  }).catch(console.error);
+}
+
+function checkUserBest() {
+  osuApi.getUserBest({u: osulink[i].osu_id, limit: limits})
+  .then(scores => {
+    for (let q in scores) {
+      let scoreTime = scores[q].raw_date;
+      let osuTime = moment_tz.tz(scoreTime, "Australia/Perth");
+      let latvianTime = osuTime.clone().tz("Europe/Riga").format("YYYY-MM-DD HH:mm:ss");
+      let difference = moment().diff(latvianTime);
+      let z = parseInt(q);
+      if (difference <= 600000) {
+        if (scores[q].rank === "SS" || scores[q].rank === "S" || scores[q].rank === "SH" || scores[q].rank === "SSH"){
+          let rank = scores[q].rank;
+          checkBeatmapInfo();
+        }
+        else {
+          if (scores[q].counts.miss === "1"){
+            let rank = `${scores[q].rank} ${scores[q].counts.miss}x miss`;
+            checkBeatmapInfo();
+          }
+          else {
+            let rank = `${scores[q].rank} ${scores[q].counts.miss}x misses`;
+            checkBeatmapInfo();
+          }
+        } 
+      }
+    }
+  }).catch(console.error);
+}
+
+function checkBeatmapInfo() {
+  osuApi.getBeatmaps({b: scores[q].beatmapId})
+  .then(beatmaps => {
+    let difficulty = Math.round(beatmaps[0].difficulty.rating * 100) / 100;
+
+    let tris = parseInt(scores[q].counts["300"]);
+    let simts = parseInt(scores[q].counts["100"]);
+    let piecdesmit = parseInt(scores[q].counts["50"]);
+    let miss = parseInt(scores[q].counts.miss);
+    let points = (piecdesmit * 50) + (simts * 100) + (tris * 300);
+    let hits = miss + piecdesmit + simts + tris;
+    let formula = points / (hits * 300);
+    let komats = formula * 100;
+    let accuracy = Math.round(komats * 100) / 100;
+
+    let pp = Math.round(scores[q].pp * 100) / 100;
+    let totalpp = Math.round(user.pp.raw * 100) / 100;
+
+    let min = Math.floor(difference / 60000);
+    let sec = ((difference % 60000) / 1000).toFixed(0);
+
+    let mods = scores[q].mods.join("");
+
+    if (min === 1 && sec === 1) {
+      let delay = `Pirms ${min} minūtes un ${sec} sekundes`;
+      checkMods();
+    }
+    else if (min === 1 && sec != 1) {
+      let delay = `Pirms ${min} minūtes un ${sec} sekundēm`;
+      checkMods();
+    }
+    else if (min != 1 && sec === 1)  {
+      let delay = `Pirms ${min} minūtēm un ${sec} sekundes`;
+      checkMods();
+    }
+    else {
+      let delay = `Pirms ${min} minūtēm un ${sec} sekundēm`;
+      checkMods();
+    }
+  }).catch(console.error);
+}
+
+function checkMods() {
+  for (k in scores[q].mods) {
+    if (scores[q].mods[k] === "DT") {
+      let dt = true;
+      modsEval();
+    }
+    else if (scores[q].mods[k] === "HT") {
+      let ht = true;
+      modsEval();
+    }
+    else {
+      modsEval();
+    }
+  }
+}
+
+function modsEval() {
+  if (dt) {
+    let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 1.5)})`
+    let m = Math.floor((beatmaps[0].time.total) / 60);
+    let sf = Math.floor(beatmaps[0].time.total) % 60;
+    let s = ("0" + sf).slice(-2);
+    let m2 = Math.floor((beatmaps[0].time.total * (2/3)) / 60);
+    let s2f = Math.floor((beatmaps[0].time.total * (2/3)) % 60);
+    let s2 = ("0" + s2f).slice(-2);
+    let laiks = `${m}:${s} (${m2}:${s2})`;
+    postScore();
+  }
+  else if (ht) {
+    let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 0.75)})`
+    let m = Math.floor((beatmaps[0].time.total) / 60);
+    let sf = Math.floor(beatmaps[0].time.total) % 60;
+    let s = ("0" + sf).slice(-2);
+    let m2 = Math.floor((beatmaps[0].time.total * (4/3)) / 60);
+    let s2f = Math.floor((beatmaps[0].time.total * (4/3)) % 60);
+    let s2 = ("0" + s2f).slice(-2);
+    let laiks = `${m}:${s} (${m2}:${s2})`;
+    postScore();
+  }
+  else {
+    let bpm = beatmaps[0].bpm;
+    let m = Math.floor((beatmaps[0].time.total) / 60);
+    let sf = Math.floor(beatmaps[0].time.total) % 60;
+    let s = ("0" + sf).slice(-2);
+    let laiks = `${m}:${s}`;
+    postScore();
+  }
+}
+
+function postScore() {
+  const channel = message.guild.channels.find("name", "botspam");
+
+  if (scores[q].mods[0] === undefined) {
+    channel.send(new Discord.RichEmbed()
+    .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
+    .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
+    .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__ 
+#${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
+x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod
+[${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
+${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
+    .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
+    ).catch(console.error);
+    }
+  else {
+    channel.send(new Discord.RichEmbed()
+    .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
+    .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
+    .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__
+#${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
+x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
+[${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
+${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
+    .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
+    ).catch(console.error);
+    }
+}
