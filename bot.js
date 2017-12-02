@@ -209,10 +209,10 @@ function main(message) {
   console.log(`[${moment().format("HH:mm:ss")}] Šī pārbaude aizņems aptuveni ${Math.round(osulink.length * 4 / 60)} minūtes!`);
   for (let i in osulink) {
     setInterval(checkRank, 4000);
-    checkRank(i, osulink);
+    checkRank(i, osulink, message);
   }
 }
-function checkRank(i, osulink) {
+function checkRank(i, osulink, message) {
   osuApi.getUser({u: osulink[i].osu_id})
   .then(user => {
     let LVRank = parseInt(user.pp.countryRank);
