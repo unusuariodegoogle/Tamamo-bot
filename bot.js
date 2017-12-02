@@ -208,6 +208,7 @@ function main(message) {
   console.log(`[${moment().format("HH:mm:ss")}] Sāku pārbaudīt scorus...`);
   console.log(`[${moment().format("HH:mm:ss")}] Šī pārbaude aizņems aptuveni ${Math.round(osulink.length * 4 / 60)} minūtes!`);
   for (let i in osulink) {
+    let message = message;
     setInterval(checkRank, 4000);
     checkRank(i, osulink, message);
   }
@@ -215,6 +216,7 @@ function main(message) {
 function checkRank(i, osulink, message) {
   osuApi.getUser({u: osulink[i].osu_id})
   .then(user => {
+    let message = message;
     let LVRank = parseInt(user.pp.countryRank);
     console.log(`[${moment().format("HH:mm:ss")}] ${user.name} - #${LVRank} LV`);
     console.log(`[${moment().format("HH:mm:ss")}] Pašlaik pārbaudu ${user.name} scorus!`);
@@ -282,6 +284,7 @@ function checkUserBest(i, osulink, limits, user, message) {
   osuApi.getUserBest({u: osulink[i].osu_id, limit: limits})
   .then(scores => {
     for (let q in scores) {
+      let message = message;
       let scoreTime = scores[q].raw_date;
       let osuTime = moment_tz.tz(scoreTime, "Australia/Perth");
       let latvianTime = osuTime.clone().tz("Europe/Riga").format("YYYY-MM-DD HH:mm:ss");
@@ -309,6 +312,7 @@ function checkUserBest(i, osulink, limits, user, message) {
 function checkBeatmapInfo(scores, rank, user, q, difference, message) {
   osuApi.getBeatmaps({b: scores[q].beatmapId})
   .then(beatmaps => {
+    let message = message;
     let min = Math.floor(difference / 60000);
     let sec = ((difference % 60000) / 1000).toFixed(0);
 
@@ -334,6 +338,7 @@ function checkBeatmapInfo(scores, rank, user, q, difference, message) {
 }
 
 function checkMods(delay, q, scores, user, beatmaps, rank, message) {
+  let message = message;
   for (k in scores[q].mods) {
     if (scores[q].mods[k] === "DT") {
       let dt = true;
@@ -351,6 +356,7 @@ function checkMods(delay, q, scores, user, beatmaps, rank, message) {
 }
 
 function modsEval(delay, q, scores, user, beatmaps, rank, mod, message) {
+  let message = message;
   if (mod) {
     let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 1.5)})`
     let m = Math.floor((beatmaps[0].time.total) / 60);
@@ -360,7 +366,7 @@ function modsEval(delay, q, scores, user, beatmaps, rank, mod, message) {
     let s2f = Math.floor((beatmaps[0].time.total * (2/3)) % 60);
     let s2 = ("0" + s2f).slice(-2);
     let laiks = `${m}:${s} (${m2}:${s2})`;
-    postScore(delay, q, scores, user, beatmaps, rank, bpm, laiks);
+    postScore(delay, q, scores, user, beatmaps, rank, bpm, laiks, message);
   }
   else if (mod) {
     let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 0.75)})`
