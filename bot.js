@@ -183,7 +183,7 @@ client.on("message", (message) => {
         .then(scores => {
           for (q in scores) {
             let difference = getDifference(scores);
-            if (difference >= 600000) {
+            if (difference <= 600000) {
               let rank = checkScoreRank(scores);
               let getDelay = getDelay(difference)
               let delay = getDelay[0];
