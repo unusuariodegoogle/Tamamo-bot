@@ -46,7 +46,7 @@ client.on("message", (message) => {
       return 40;
      }
      else if (LVRank <= 50) {
-      message.guild.member(osulink[i].discord_id).addRole("202061582006485002").catch(console.error);
+       message.guild.member(osulink[i].discord_id).addRole("202061582006485002").catch(console.error);
       setTimeout(() => {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
@@ -68,14 +68,14 @@ client.on("message", (message) => {
      }
 }
 
-  function getDifference(scores) {
+  function getDifference(scores, q) {
     let scoreTime = scores[q].raw_date;
     let osuTime = moment_tz.tz(scoreTime, "Australia/Perth");
     let latvianTime = osuTime.clone().tz("Europe/Riga").format("YYYY-MM-DD HH:mm:ss");
     return [moment().diff(latvianTime), latvianTime];
   }
   
-  function checkScoreRank(scores) {
+  function checkScoreRank(scores, q) {
     if (scores[q].rank === "X" || scores[q].rank === "XH"|| scores[q].rank === "S" || scores[q].rank === "SH") {
       return scores[q].rank;
     }
@@ -107,10 +107,12 @@ client.on("message", (message) => {
     }  
   }
   
-  function checkMods(scores) {
-    for (k in scores[q].mods) {
+  function checkMods(scores, q) {
+    if (scores[q].mods[0] === undefined) {
+      return [false, false, true];
+    }
+    for (let k = 0;k < scores[q].mods.length; k++) {
       if (scores[q].mods[k] === "DT") {
-  
         return [true, false, false];
       }
       else if (scores[q].mods[k] === "HT") {
@@ -154,7 +156,7 @@ client.on("message", (message) => {
       return [bpm, laiks];
     }
   }
-  function getAccuracy(scores) {
+  function getAccuracy(scores, q) {
     let tris = parseInt(scores[q].counts["300"]);
     let simts = parseInt(scores[q].counts["100"]);
     let piecdesmit = parseInt(scores[q].counts["50"]);
@@ -165,7 +167,7 @@ client.on("message", (message) => {
     let komats = formula * 100;
     return Math.round(komats * 100) / 100;
   }
-  function postScore(user, scores, beatmaps, limits, rank, accuracy, laiks, bpm, delay, latvianTime) {
+  function postScore(user, scores, beatmaps, limits, rank, accuracy, laiks, bpm, delay, latvianTime, q) {
     let pp = Math.round(scores[q].pp * 100) / 100;
     let totalpp = Math.round(user.pp.raw * 100) / 100;
   
@@ -177,9 +179,9 @@ client.on("message", (message) => {
   
     if (scores[q].mods[0] === undefined) {
       channel.send(new Discord.RichEmbed()
-      .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
+      .setAuthor(`${user.name} | Max - top ${limits}`, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
       .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-      .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__ 
+      .setDescription(`__**${pp}pp |** #${z + 1} personal best__ 
   #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
   x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod
   [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
@@ -189,9 +191,9 @@ client.on("message", (message) => {
     }
     else {
       channel.send(new Discord.RichEmbed()
-      .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
+      .setAuthor(`${user.name} | Max - top ${limits}`, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
       .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-      .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__
+      .setDescription(`__**${pp}pp |** #${z + 1} personal best__
   #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
   x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
   [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
@@ -233,24 +235,24 @@ client.on("message", (message) => {
         let limits = checkRank(LVRank, osulink, i);
         osuApi.getUserBest({u: osulink[i].osu_id, limit: limits})
         .then(scores => {
-          for (q in scores) {
-            let difference = getDifference(scores);
+          for (let q = 0; q < scores.length; q++) {
+            let getdifference = getDifference(scores, q);
+            let difference = getdifference [0];
+            let latvianTime = getdifference [1];
             if (difference <= 600000) {
-              let rank = checkScoreRank(scores);
-              let getDelay = getDelay(difference)
-              let delay = getDelay[0];
-              let latvianTime = getDelay[1];
-              let modi = checkMods(scores);
+              let rank = checkScoreRank(scores, q);
+              let delay = getDelay(difference)
+              let modi = checkMods(scores, q);
               let dt = modi[0];
               let ht = modi[1];
               let other = modi[2];
-              let accuracy = getAccuracy(scores);
+              let accuracy = getAccuracy(scores, q);
               osuApi.getBeatmaps({b: scores[q].beatmapId})
               .then(beatmaps => {
-                let lengthAndBpm = lengthAndBpm(dt, ht, other, beatmaps);
-                let bpm = lengthAndBpm[0];
-                let laiks = lengthAndBpm[1];
-                postScore(user, scores, beatmaps, limits, rank, accuracy, laiks, bpm, delay, latvianTime);
+                let ilgumsunbpm = lengthAndBpm(dt, ht, other, beatmaps);
+                let bpm = ilgumsunbpm[0];
+                let laiks = ilgumsunbpm[1];
+                postScore(user, scores, beatmaps, limits, rank, accuracy, laiks, bpm, delay, latvianTime, q);
               }).catch(console.error);
             }
           }
