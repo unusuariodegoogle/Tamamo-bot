@@ -209,10 +209,10 @@ function main(message) {
   console.log(`[${moment().format("HH:mm:ss")}] Šī pārbaude aizņems aptuveni ${Math.round(osulink.length * 4 / 60)} minūtes!`);
   for (let i in osulink) {
     setInterval(checkRank, 4000);
-    checkRank();
+    checkRank(i, osulink);
   }
 }
-function checkRank() {
+function checkRank(i, osulink) {
   osuApi.getUser({u: osulink[i].osu_id})
   .then(user => {
     let LVRank = parseInt(user.pp.countryRank);
@@ -224,7 +224,7 @@ function checkRank() {
       message.guild.member(osulink[i].discord_id).removeRoles(["202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 100;
-      checkUserBest();
+      checkUserBest(i, osulink, limits, user);
      }
      else if (LVRank <= 5) {
       message.guild.member(osulink[i].discord_id).addRole("202061474213003265").catch(console.error);
@@ -232,7 +232,7 @@ function checkRank() {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 75;
-      checkUserBest();
+      checkUserBest(i, osulink, limits, user);
      }
      else if (LVRank <= 10) {
       message.guild.member(osulink[i].discord_id).addRole("202061507037495296").catch(console.error);
@@ -240,7 +240,7 @@ function checkRank() {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 50;
-      checkUserBest();
+      checkUserBest(i, osulink, limits, user);
      }
      else if (LVRank <= 25) {
       message.guild.member(osulink[i].discord_id).addRole("202061546787045377").catch(console.error);
@@ -248,7 +248,7 @@ function checkRank() {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 40;
-      checkUserBest();
+      checkUserBest(i, osulink, limits, user);
      }
      else if (LVRank <= 50) {
       message.guild.member(osulink[i].discord_id).addRole("202061582006485002").catch(console.error);
@@ -256,7 +256,7 @@ function checkRank() {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 30;
-      checkUserBest();
+      checkUserBest(i, osulink, limits, user);
      }
      else if (LVRank <= 100) {
       message.guild.member(osulink[i].discord_id).addRole("202061613644251136").catch(console.error);
@@ -264,7 +264,7 @@ function checkRank() {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 20;
-      checkUserBest();
+      checkUserBest(i, osulink, limits, user);
      }
      else {
       message.guild.member(osulink[i].discord_id).addRole("297854952435351552").catch(console.error);
@@ -272,13 +272,13 @@ function checkRank() {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 10;
-      checkUserBest();
+      checkUserBest(i, osulink, limits, user);
      }
 
   }).catch(console.error);
 }
 
-function checkUserBest() {
+function checkUserBest(i, osulink, limits, user) {
   osuApi.getUserBest({u: osulink[i].osu_id, limit: limits})
   .then(scores => {
     for (let q in scores) {
@@ -286,20 +286,19 @@ function checkUserBest() {
       let osuTime = moment_tz.tz(scoreTime, "Australia/Perth");
       let latvianTime = osuTime.clone().tz("Europe/Riga").format("YYYY-MM-DD HH:mm:ss");
       let difference = moment().diff(latvianTime);
-      let z = parseInt(q);
       if (difference <= 600000) {
         if (scores[q].rank === "SS" || scores[q].rank === "S" || scores[q].rank === "SH" || scores[q].rank === "SSH"){
           let rank = scores[q].rank;
-          checkBeatmapInfo();
+          checkBeatmapInfo(scores, rank, user, q, difference);
         }
         else {
           if (scores[q].counts.miss === "1"){
             let rank = `${scores[q].rank} ${scores[q].counts.miss}x miss`;
-            checkBeatmapInfo();
+            checkBeatmapInfo(scores, rank, user, q, difference);
           }
           else {
             let rank = `${scores[q].rank} ${scores[q].counts.miss}x misses`;
-            checkBeatmapInfo();
+            checkBeatmapInfo(scores, rank, user, q, difference);
           }
         } 
       }
@@ -307,24 +306,9 @@ function checkUserBest() {
   }).catch(console.error);
 }
 
-function checkBeatmapInfo() {
+function checkBeatmapInfo(scores, rank, user, q, difference) {
   osuApi.getBeatmaps({b: scores[q].beatmapId})
   .then(beatmaps => {
-    let difficulty = Math.round(beatmaps[0].difficulty.rating * 100) / 100;
-
-    let tris = parseInt(scores[q].counts["300"]);
-    let simts = parseInt(scores[q].counts["100"]);
-    let piecdesmit = parseInt(scores[q].counts["50"]);
-    let miss = parseInt(scores[q].counts.miss);
-    let points = (piecdesmit * 50) + (simts * 100) + (tris * 300);
-    let hits = miss + piecdesmit + simts + tris;
-    let formula = points / (hits * 300);
-    let komats = formula * 100;
-    let accuracy = Math.round(komats * 100) / 100;
-
-    let pp = Math.round(scores[q].pp * 100) / 100;
-    let totalpp = Math.round(user.pp.raw * 100) / 100;
-
     let min = Math.floor(difference / 60000);
     let sec = ((difference % 60000) / 1000).toFixed(0);
 
@@ -332,41 +316,42 @@ function checkBeatmapInfo() {
 
     if (min === 1 && sec === 1) {
       let delay = `Pirms ${min} minūtes un ${sec} sekundes`;
-      checkMods();
+      checkMods(delay, q, scores, user, beatmaps, rank);
     }
     else if (min === 1 && sec != 1) {
       let delay = `Pirms ${min} minūtes un ${sec} sekundēm`;
-      checkMods();
+      checkMods(delay, q, scores, user, beatmaps, rank);
     }
     else if (min != 1 && sec === 1)  {
       let delay = `Pirms ${min} minūtēm un ${sec} sekundes`;
-      checkMods();
+      checkMods(delay, q, scores, user, beatmaps, rank);
     }
     else {
       let delay = `Pirms ${min} minūtēm un ${sec} sekundēm`;
-      checkMods();
+      checkMods(delay, q, scores, user, beatmaps, rank);
     }
   }).catch(console.error);
 }
 
-function checkMods() {
+function checkMods(delay, q, scores, user, beatmaps, rank) {
   for (k in scores[q].mods) {
     if (scores[q].mods[k] === "DT") {
       let dt = true;
-      modsEval();
+      modsEval(delay, q, scores, user, beatmaps, rank, dt);
     }
     else if (scores[q].mods[k] === "HT") {
       let ht = true;
-      modsEval();
+      modsEval(delay, q, scores, user, beatmaps, rank, ht);
     }
     else {
-      modsEval();
+      let mod = false;
+      modsEval(delay, q, scores, user, beatmaps, rank, mod);
     }
   }
 }
 
-function modsEval() {
-  if (dt) {
+function modsEval(delay, q, scores, user, beatmaps, rank, mod) {
+  if (mod) {
     let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 1.5)})`
     let m = Math.floor((beatmaps[0].time.total) / 60);
     let sf = Math.floor(beatmaps[0].time.total) % 60;
@@ -375,9 +360,9 @@ function modsEval() {
     let s2f = Math.floor((beatmaps[0].time.total * (2/3)) % 60);
     let s2 = ("0" + s2f).slice(-2);
     let laiks = `${m}:${s} (${m2}:${s2})`;
-    postScore();
+    postScore(delay, q, scores, user, beatmaps, rank, bpm, laiks);
   }
-  else if (ht) {
+  else if (mod) {
     let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 0.75)})`
     let m = Math.floor((beatmaps[0].time.total) / 60);
     let sf = Math.floor(beatmaps[0].time.total) % 60;
@@ -386,7 +371,7 @@ function modsEval() {
     let s2f = Math.floor((beatmaps[0].time.total * (4/3)) % 60);
     let s2 = ("0" + s2f).slice(-2);
     let laiks = `${m}:${s} (${m2}:${s2})`;
-    postScore();
+    postScore(delay, q, scores, user, beatmaps, rank, bpm, laiks);
   }
   else {
     let bpm = beatmaps[0].bpm;
@@ -394,12 +379,28 @@ function modsEval() {
     let sf = Math.floor(beatmaps[0].time.total) % 60;
     let s = ("0" + sf).slice(-2);
     let laiks = `${m}:${s}`;
-    postScore();
+    postScore(delay, q, scores, user, beatmaps, rank, bpm, laiks);
   }
 }
 
-function postScore() {
+function postScore(delay, q, scores, user, beatmaps, rank, bpm, laiks) {
   const channel = message.guild.channels.find("name", "botspam");
+  let z = parseInt(q);
+
+  let difficulty = Math.round(beatmaps[0].difficulty.rating * 100) / 100;
+
+  let tris = parseInt(scores[q].counts["300"]);
+  let simts = parseInt(scores[q].counts["100"]);
+  let piecdesmit = parseInt(scores[q].counts["50"]);
+  let miss = parseInt(scores[q].counts.miss);
+  let points = (piecdesmit * 50) + (simts * 100) + (tris * 300);
+  let hits = miss + piecdesmit + simts + tris;
+  let formula = points / (hits * 300);
+  let komats = formula * 100;
+  let accuracy = Math.round(komats * 100) / 100;
+
+  let pp = Math.round(scores[q].pp * 100) / 100;
+  let totalpp = Math.round(user.pp.raw * 100) / 100;
 
   if (scores[q].mods[0] === undefined) {
     channel.send(new Discord.RichEmbed()
