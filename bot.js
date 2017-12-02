@@ -32,8 +32,19 @@ client.on("message", (message) => {
     }
   }
   if (command === "check") {
-    setInterval(main, 600000);
-    main(message);
+    message.channel.send("Jebal mazaa");
+    let parse = fs.readFileSync("./osulink.json");
+    let osulink = JSON.parse(parse);
+    console.log(`[${moment().format("HH:mm:ss")}] Sāku pārbaudīt scorus...`);
+    console.log(`[${moment().format("HH:mm:ss")}] Šī pārbaude aizņems aptuveni ${Math.round(osulink.length * 4 / 60)} minūtes!`);
+    for (let i in osulink) {
+      let message = message;
+      setInterval(checkRank, 4000);
+      let checkRank = checkRank(i, osulink, message);
+      let limits = checkRank[0];
+      let user = checkRank[1];
+      console.log(limits);
+    }
     return;
   }
   if (command === "desa") {
@@ -201,22 +212,9 @@ client.on("guildMemberRemove", (member) => {
   }
 });
 
-function main(message) {
-  message.channel.send("Jebal mazaa");
-  let parse = fs.readFileSync("./osulink.json");
-  let osulink = JSON.parse(parse);
-  console.log(`[${moment().format("HH:mm:ss")}] Sāku pārbaudīt scorus...`);
-  console.log(`[${moment().format("HH:mm:ss")}] Šī pārbaude aizņems aptuveni ${Math.round(osulink.length * 4 / 60)} minūtes!`);
-  for (let i in osulink) {
-    let message = message;
-    setInterval(checkRank, 4000);
-    checkRank(i, osulink, message);
-  }
-}
 function checkRank(i, osulink, message) {
   osuApi.getUser({u: osulink[i].osu_id})
   .then(user => {
-    let message = message;
     let LVRank = parseInt(user.pp.countryRank);
     console.log(`[${moment().format("HH:mm:ss")}] ${user.name} - #${LVRank} LV`);
     console.log(`[${moment().format("HH:mm:ss")}] Pašlaik pārbaudu ${user.name} scorus!`);
@@ -226,7 +224,7 @@ function checkRank(i, osulink, message) {
       message.guild.member(osulink[i].discord_id).removeRoles(["202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 100;
-      checkUserBest(i, osulink, limits, user, message);
+      return [limits, user];
      }
      else if (LVRank <= 5) {
       message.guild.member(osulink[i].discord_id).addRole("202061474213003265").catch(console.error);
@@ -234,7 +232,7 @@ function checkRank(i, osulink, message) {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 75;
-      checkUserBest(i, osulink, limits, user, message);
+      return [limits, user];
      }
      else if (LVRank <= 10) {
       message.guild.member(osulink[i].discord_id).addRole("202061507037495296").catch(console.error);
@@ -242,7 +240,7 @@ function checkRank(i, osulink, message) {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061546787045377", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 50;
-      checkUserBest(i, osulink, limits, user, message);
+      return [limits, user];
      }
      else if (LVRank <= 25) {
       message.guild.member(osulink[i].discord_id).addRole("202061546787045377").catch(console.error);
@@ -250,7 +248,7 @@ function checkRank(i, osulink, message) {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061582006485002", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 40;
-      checkUserBest(i, osulink, limits, user, message);
+      return [limits, user];
      }
      else if (LVRank <= 50) {
       message.guild.member(osulink[i].discord_id).addRole("202061582006485002").catch(console.error);
@@ -258,7 +256,7 @@ function checkRank(i, osulink, message) {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061613644251136", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 30;
-      checkUserBest(i, osulink, limits, user, message);
+      return [limits, user];
      }
      else if (LVRank <= 100) {
       message.guild.member(osulink[i].discord_id).addRole("202061613644251136").catch(console.error);
@@ -266,7 +264,7 @@ function checkRank(i, osulink, message) {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "297854952435351552", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 20;
-      checkUserBest(i, osulink, limits, user, message);
+      return [limits, user];
      }
      else {
       message.guild.member(osulink[i].discord_id).addRole("297854952435351552").catch(console.error);
@@ -274,9 +272,8 @@ function checkRank(i, osulink, message) {
       message.guild.member(osulink[i].discord_id).removeRoles(["202057149860282378", "202061474213003265", "202061507037495296", "202061546787045377", "202061582006485002", "202061613644251136", "348195423841943564"]).catch(console.error);
       }, 2000);
       let limits = 10;
-      checkUserBest(i, osulink, limits, user, message);
+      return [limits, user];
      }
-
   }).catch(console.error);
 }
 
@@ -284,7 +281,6 @@ function checkUserBest(i, osulink, limits, user, message) {
   osuApi.getUserBest({u: osulink[i].osu_id, limit: limits})
   .then(scores => {
     for (let q in scores) {
-      let message = message;
       let scoreTime = scores[q].raw_date;
       let osuTime = moment_tz.tz(scoreTime, "Australia/Perth");
       let latvianTime = osuTime.clone().tz("Europe/Riga").format("YYYY-MM-DD HH:mm:ss");
@@ -312,7 +308,6 @@ function checkUserBest(i, osulink, limits, user, message) {
 function checkBeatmapInfo(scores, rank, user, q, difference, message) {
   osuApi.getBeatmaps({b: scores[q].beatmapId})
   .then(beatmaps => {
-    let message = message;
     let min = Math.floor(difference / 60000);
     let sec = ((difference % 60000) / 1000).toFixed(0);
 
@@ -338,7 +333,6 @@ function checkBeatmapInfo(scores, rank, user, q, difference, message) {
 }
 
 function checkMods(delay, q, scores, user, beatmaps, rank, message) {
-  let message = message;
   for (k in scores[q].mods) {
     if (scores[q].mods[k] === "DT") {
       let dt = true;
@@ -356,7 +350,6 @@ function checkMods(delay, q, scores, user, beatmaps, rank, message) {
 }
 
 function modsEval(delay, q, scores, user, beatmaps, rank, mod, message) {
-  let message = message;
   if (mod) {
     let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 1.5)})`
     let m = Math.floor((beatmaps[0].time.total) / 60);
