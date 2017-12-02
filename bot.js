@@ -33,7 +33,7 @@ client.on("message", (message) => {
   }
   if (command === "check") {
     setInterval(main, 600000);
-    main();
+    main(message);
     return;
   }
   if (command === "desa") {
@@ -201,7 +201,7 @@ client.on("guildMemberRemove", (member) => {
   }
 });
 
-function main() {
+function main(message) {
   message.channel.send("Jebal mazaa");
   let parse = fs.readFileSync("./osulink.json");
   let osulink = JSON.parse(parse);
