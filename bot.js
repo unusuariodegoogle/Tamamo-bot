@@ -105,6 +105,7 @@ client.on("message", (message) => {
                 var limits = 1;
               }
            }
+          console.log(limits);
           osuApi.getUserBest({u: osulink[i].osu_id, limit: limits})
           .then(scores => {
           for (let q in scores) {
