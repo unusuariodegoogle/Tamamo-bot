@@ -16,6 +16,139 @@ client.on("ready", () => {
 });
 
 client.on("message", (message) => {
+  function getDifference(scores) {
+    let scoreTime = scores[q].raw_date;
+    let osuTime = moment_tz.tz(scoreTime, "Australia/Perth");
+    let latvianTime = osuTime.clone().tz("Europe/Riga").format("YYYY-MM-DD HH:mm:ss");
+    return [moment().diff(latvianTime), latvianTime];
+  }
+  
+  function checkScoreRank(scores) {
+    if (scores[q].rank === "X" || scores[q].rank === "XH"|| scores[q].rank === "S" || scores[q].rank === "SH") {
+      return scores[q].rank;
+    }
+    else {
+      if (scores[q].counts.miss === "1"){
+        return `${scores[q].rank} ${scores[q].counts.miss}x miss`;
+      }
+      else {
+        return `${scores[q].rank} ${scores[q].counts.miss}x misses`;
+      }
+    }
+  }
+  
+  function getDelay(difference) {
+    let min = Math.floor(difference / 60000);
+    let sec = ((difference % 60000) / 1000).toFixed(0);
+  
+    if (min === 1 && sec === 1) {
+      return `Pirms ${min} minūtes un ${sec} sekundes`;
+    }
+    else if (min === 1 && sec != 1) {
+      return `Pirms ${min} minūtes un ${sec} sekundēm`;
+    }
+    else if (min != 1 && sec === 1)  {
+      return `Pirms ${min} minūtēm un ${sec} sekundes`;
+    }
+    else {
+      return `Pirms ${min} minūtēm un ${sec} sekundēm`;
+    }  
+  }
+  
+  function checkMods(scores) {
+    for (k in scores[q].mods) {
+      if (scores[q].mods[k] === "DT") {
+  
+        return [true, false, false];
+      }
+      else if (scores[q].mods[k] === "HT") {
+        return [false, true, false];
+      }
+      else {
+        return [false, false, true];
+      }
+    }
+  }
+  
+  function lengthAndBpm(dt, ht, other, beatmaps) {
+    if (dt) {
+      let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 1.5)})`
+      let m = Math.floor((beatmaps[0].time.total) / 60);
+      let sf = Math.floor(beatmaps[0].time.total) % 60;
+      let s = ("0" + sf).slice(-2);
+      let m2 = Math.floor((beatmaps[0].time.total * (2/3)) / 60);
+      let s2f = Math.floor((beatmaps[0].time.total * (2/3)) % 60);
+      let s2 = ("0" + s2f).slice(-2);
+      let laiks = `${m}:${s} (${m2}:${s2})`;
+      return [bpm, laiks];
+    }
+    else if (ht) {
+      let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 0.75)})`
+      let m = Math.floor((beatmaps[0].time.total) / 60);
+      let sf = Math.floor(beatmaps[0].time.total) % 60;
+      let s = ("0" + sf).slice(-2);
+      let m2 = Math.floor((beatmaps[0].time.total * (4/3)) / 60);
+      let s2f = Math.floor((beatmaps[0].time.total * (4/3)) % 60);
+      let s2 = ("0" + s2f).slice(-2);
+      let laiks = `${m}:${s} (${m2}:${s2})`;
+      return [bpm, laiks];
+    }
+    else if (other) {
+      let bpm = beatmaps[0].bpm;
+      let m = Math.floor((beatmaps[0].time.total) / 60);
+      let sf = Math.floor(beatmaps[0].time.total) % 60;
+      let s = ("0" + sf).slice(-2);
+      let laiks = `${m}:${s}`;
+      return [bpm, laiks];
+    }
+  }
+  function getAccuracy(scores) {
+    let tris = parseInt(scores[q].counts["300"]);
+    let simts = parseInt(scores[q].counts["100"]);
+    let piecdesmit = parseInt(scores[q].counts["50"]);
+    let miss = parseInt(scores[q].counts.miss);
+    let points = (piecdesmit * 50) + (simts * 100) + (tris * 300);
+    let hits = miss + piecdesmit + simts + tris;
+    let formula = points / (hits * 300);
+    let komats = formula * 100;
+    return Math.round(komats * 100) / 100;
+  }
+  function postScore(user, scores, beatmaps, limits, rank, accuracy, laiks, bpm, delay, latvianTime) {
+    let pp = Math.round(scores[q].pp * 100) / 100;
+    let totalpp = Math.round(user.pp.raw * 100) / 100;
+  
+    let mods = scores[q].mods.join("");
+    const channel = message.guild.channels.find("name", "botspam");
+    let difficulty = Math.round(beatmaps[0].difficulty.rating * 100) / 100;
+  
+    let z = parseInt(q);
+  
+    if (scores[q].mods[0] === undefined) {
+      channel.send(new Discord.RichEmbed()
+      .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
+      .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
+      .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__ 
+  #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
+  x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod
+  [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
+  ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
+      .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
+      ).catch(console.error);
+    }
+    else {
+      channel.send(new Discord.RichEmbed()
+      .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
+      .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
+      .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__
+  #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
+  x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
+  [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
+  ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
+      .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
+      ).catch(console.error);
+    }
+  }
+  
   if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
   const prefix = config.prefix;
@@ -144,139 +277,6 @@ client.on("message", (message) => {
       }, 2000);
       return 10;
      }
-}
-
-function getDifference(scores) {
-  let scoreTime = scores[q].raw_date;
-  let osuTime = moment_tz.tz(scoreTime, "Australia/Perth");
-  let latvianTime = osuTime.clone().tz("Europe/Riga").format("YYYY-MM-DD HH:mm:ss");
-  return [moment().diff(latvianTime), latvianTime];
-}
-
-function checkScoreRank(scores) {
-  if (scores[q].rank === "X" || scores[q].rank === "XH"|| scores[q].rank === "S" || scores[q].rank === "SH") {
-    return scores[q].rank;
-  }
-  else {
-    if (scores[q].counts.miss === "1"){
-      return `${scores[q].rank} ${scores[q].counts.miss}x miss`;
-    }
-    else {
-      return `${scores[q].rank} ${scores[q].counts.miss}x misses`;
-    }
-  }
-}
-
-function getDelay(difference) {
-  let min = Math.floor(difference / 60000);
-  let sec = ((difference % 60000) / 1000).toFixed(0);
-
-  if (min === 1 && sec === 1) {
-    return `Pirms ${min} minūtes un ${sec} sekundes`;
-  }
-  else if (min === 1 && sec != 1) {
-    return `Pirms ${min} minūtes un ${sec} sekundēm`;
-  }
-  else if (min != 1 && sec === 1)  {
-    return `Pirms ${min} minūtēm un ${sec} sekundes`;
-  }
-  else {
-    return `Pirms ${min} minūtēm un ${sec} sekundēm`;
-  }  
-}
-
-function checkMods(scores) {
-  for (k in scores[q].mods) {
-    if (scores[q].mods[k] === "DT") {
-
-      return [true, false, false];
-    }
-    else if (scores[q].mods[k] === "HT") {
-      return [false, true, false];
-    }
-    else {
-      return [false, false, true];
-    }
-  }
-}
-
-function lengthAndBpm(dt, ht, other, beatmaps) {
-  if (dt) {
-    let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 1.5)})`
-    let m = Math.floor((beatmaps[0].time.total) / 60);
-    let sf = Math.floor(beatmaps[0].time.total) % 60;
-    let s = ("0" + sf).slice(-2);
-    let m2 = Math.floor((beatmaps[0].time.total * (2/3)) / 60);
-    let s2f = Math.floor((beatmaps[0].time.total * (2/3)) % 60);
-    let s2 = ("0" + s2f).slice(-2);
-    let laiks = `${m}:${s} (${m2}:${s2})`;
-    return [bpm, laiks];
-  }
-  else if (ht) {
-    let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 0.75)})`
-    let m = Math.floor((beatmaps[0].time.total) / 60);
-    let sf = Math.floor(beatmaps[0].time.total) % 60;
-    let s = ("0" + sf).slice(-2);
-    let m2 = Math.floor((beatmaps[0].time.total * (4/3)) / 60);
-    let s2f = Math.floor((beatmaps[0].time.total * (4/3)) % 60);
-    let s2 = ("0" + s2f).slice(-2);
-    let laiks = `${m}:${s} (${m2}:${s2})`;
-    return [bpm, laiks];
-  }
-  else if (other) {
-    let bpm = beatmaps[0].bpm;
-    let m = Math.floor((beatmaps[0].time.total) / 60);
-    let sf = Math.floor(beatmaps[0].time.total) % 60;
-    let s = ("0" + sf).slice(-2);
-    let laiks = `${m}:${s}`;
-    return [bpm, laiks];
-  }
-}
-function getAccuracy(scores) {
-  let tris = parseInt(scores[q].counts["300"]);
-  let simts = parseInt(scores[q].counts["100"]);
-  let piecdesmit = parseInt(scores[q].counts["50"]);
-  let miss = parseInt(scores[q].counts.miss);
-  let points = (piecdesmit * 50) + (simts * 100) + (tris * 300);
-  let hits = miss + piecdesmit + simts + tris;
-  let formula = points / (hits * 300);
-  let komats = formula * 100;
-  return Math.round(komats * 100) / 100;
-}
-function postScore(user, scores, beatmaps, limits, rank, accuracy, laiks, bpm, delay, latvianTime) {
-  let pp = Math.round(scores[q].pp * 100) / 100;
-  let totalpp = Math.round(user.pp.raw * 100) / 100;
-
-  let mods = scores[q].mods.join("");
-  const channel = message.guild.channels.find("name", "botspam");
-  let difficulty = Math.round(beatmaps[0].difficulty.rating * 100) / 100;
-
-  let z = parseInt(q);
-
-  if (scores[q].mods[0] === undefined) {
-    channel.send(new Discord.RichEmbed()
-    .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
-    .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-    .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__ 
-#${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
-x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod
-[${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
-${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
-    .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
-    ).catch(console.error);
-  }
-  else {
-    channel.send(new Discord.RichEmbed()
-    .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
-    .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-    .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** max - top ${limits}__
-#${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
-x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
-[${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
-${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
-    .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
-    ).catch(console.error);
-  }
 }
 });
 
