@@ -148,7 +148,7 @@ client.on("message", (message) => {
       ).catch(console.error);
     }
   }
-  
+
   if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
   const prefix = config.prefix;
@@ -165,8 +165,8 @@ client.on("message", (message) => {
     }
   }
   if (command === "check") {
-    function check() {
     message.channel.send("Jebal mazaa");
+    function check() {
     let parse = fs.readFileSync("./osulink.json");
     let osulink = JSON.parse(parse);
     console.log(`[${moment().format("HH:mm:ss")}] Sāku pārbaudīt scorus...`);
