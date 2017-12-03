@@ -92,9 +92,21 @@ client.on("message", (message) => {
   function getDelay(difference) {
     let min = Math.floor(difference / 60000);
     let sec = ((difference % 60000) / 1000).toFixed(0);
-  
-    if (min === 1 && sec === 1) {
+
+    if (min === 0 && sec === 1) {
+      return `Pirms ${sec} sekundes`
+    }
+    if (min === 0 && sec != 1) {
+      return `Pirms ${sec} sekundēm`
+    }
+    else if (min === 1 && sec === 1) {
       return `Pirms ${min} minūtes un ${sec} sekundes`;
+    }
+    else if (min === 1 && sec === 0) {
+      return `Pirms ${min} minūtes`
+    }
+    else if (min != 1 && sec === 0) {
+      return `Pirms ${min} minūtēm`
     }
     else if (min === 1 && sec != 1) {
       return `Pirms ${min} minūtes un ${sec} sekundēm`;
@@ -179,9 +191,9 @@ client.on("message", (message) => {
   
     if (scores[q].mods[0] === undefined) {
       channel.send(new Discord.RichEmbed()
-      .setAuthor(`${user.name} | Max - top ${limits}`, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
+      .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
       .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-      .setDescription(`__**${pp}pp |** #${z + 1} personal best__ 
+      .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** Max:${limits}__ 
   #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
   x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod
   [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
@@ -191,9 +203,9 @@ client.on("message", (message) => {
     }
     else {
       channel.send(new Discord.RichEmbed()
-      .setAuthor(`${user.name} | Max - top ${limits}`, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
+      .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
       .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
-      .setDescription(`__**${pp}pp |** #${z + 1} personal best__
+      .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** Max:${limits}__
   #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
   x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
   [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
