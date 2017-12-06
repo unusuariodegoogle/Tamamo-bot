@@ -284,11 +284,11 @@ client.on("message", (message) => {
     setTimeout(function() {
       osuApi.getUser({u: osulink[i].osu_id})
       .then(user => {
+        let LVRank = parseInt(user.pp.countryRank);
         console.log(`[${moment().format("HH:mm:ss")}] ${user.name} - #${LVRank} LV`);
         console.log(`[${moment().format("HH:mm:ss")}] Pašlaik pārbaudu ${user.name} scorus!`);
         trackLeaderboardScores(user);
 
-        let LVRank = parseInt(user.pp.countryRank);
         let limits = checkRank(LVRank, osulink, i);
         osuApi.getUserBest({u: osulink[i].osu_id, limit: limits})
         .then(scores => {
