@@ -76,16 +76,14 @@ client.on("message", (message) => {
   }
   
   function checkScoreRank(scores, q) {
-    if (scores[q].rank === "X" || scores[q].rank === "XH"|| scores[q].rank === "S" || scores[q].rank === "SH") {
+    if (scores[q].counts.miss === "0") {
       return scores[q].rank;
     }
+    else if (scores[q].counts.miss === "1"){
+      return `${scores[q].rank} ${scores[q].counts.miss}x miss`;
+    }
     else {
-      if (scores[q].counts.miss === "1"){
-        return `${scores[q].rank} ${scores[q].counts.miss}x miss`;
-      }
-      else {
-        return `${scores[q].rank} ${scores[q].counts.miss}x misses`;
-      }
+      return `${scores[q].rank} ${scores[q].counts.miss}x misses`;
     }
   }
   
@@ -139,30 +137,30 @@ client.on("message", (message) => {
   function lengthAndBpm(dt, ht, other, beatmaps) {
     if (dt) {
       let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 1.5)})`
-      let m = Math.floor((beatmaps[0].time.total) / 60);
-      let sf = Math.floor(beatmaps[0].time.total) % 60;
+      let m = Math.floor(beatmaps[0].time.total / 60);
+      let sf = Math.floor(beatmaps[0].time.total % 60);
       let s = ("0" + sf).slice(-2);
-      let m2 = Math.floor((beatmaps[0].time.total * (2/3)) / 60);
-      let s2f = Math.floor((beatmaps[0].time.total * (2/3)) % 60);
+      let m2 = Math.floor(beatmaps[0].time.total / 3 * 2 / 60); 
+      let s2f = Math.floor(beatmaps[0].time.total / 3 * 2 % 60);
       let s2 = ("0" + s2f).slice(-2);
       let laiks = `${m}:${s} (${m2}:${s2})`;
       return [bpm, laiks];
     }
     else if (ht) {
       let bpm = `${beatmaps[0].bpm} (${Math.floor(beatmaps[0].bpm * 0.75)})`
-      let m = Math.floor((beatmaps[0].time.total) / 60);
-      let sf = Math.floor(beatmaps[0].time.total) % 60;
+      let m = Math.floor(beatmaps[0].time.total / 60);
+      let sf = Math.floor(beatmaps[0].time.total % 60);
       let s = ("0" + sf).slice(-2);
-      let m2 = Math.floor((beatmaps[0].time.total * (4/3)) / 60);
-      let s2f = Math.floor((beatmaps[0].time.total * (4/3)) % 60);
+      let m2 = Math.floor(beatmaps[0].time.total / 3 * 4 / 60);
+      let s2f = Math.floor(beatmaps[0].time.total / 3 * 4 % 60);
       let s2 = ("0" + s2f).slice(-2);
       let laiks = `${m}:${s} (${m2}:${s2})`;
       return [bpm, laiks];
     }
     else if (other) {
       let bpm = beatmaps[0].bpm;
-      let m = Math.floor((beatmaps[0].time.total) / 60);
-      let sf = Math.floor(beatmaps[0].time.total) % 60;
+      let m = Math.floor(beatmaps[0].time.total / 60);
+      let sf = Math.floor(beatmaps[0].time.total % 60);
       let s = ("0" + sf).slice(-2);
       let laiks = `${m}:${s}`;
       return [bpm, laiks];
@@ -215,6 +213,51 @@ client.on("message", (message) => {
     }
   }
 
+  function postLeaderboardScore(user, delay, beatmap, truePlace, latvianTime) {
+    const channel = message.guild.channels.find("name", "botspam");
+    
+    channel.send(new Discord.RichEmbed()
+    .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
+    .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
+    .setDescription(`ieguva **${truePlace}.** vietu uz
+[${beatmap.artist} - ${beatmap.title} [${beatmap.version}]](https://osu.ppy.sh/b/${beatmap.beatmapId}`)
+    .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
+    ).catch(console.error);
+  }
+
+  function trackLeaderboardScores(user) {
+    for (let t = 0; t < user.events.length; t++) {
+      let getdifference = getDifference(user.events, t);
+      let difference = getdifference[0];
+      let latvianTime = getdifference[1];
+        if (difference <= 600000) {
+          let delay = getDelay(difference);
+          let string = user.events[0].html;
+          let pos = string.indexOf("#");
+          let vieta = string.slice(pos + 1, pos + 4);
+          let split = vieta.split("</");
+          let place = parseInt(split[0]);
+          if (place <= 100) {
+            osuApi.getScores({b: user.events[t].beatmapId})
+            .then(scores, beatmap => {
+              for (let w = 0; w < scores.length; w++) {
+                if (scores[w].user_id === user.id) {
+                  let truePlace = w + 1;
+                  postLeaderboardScore(user, delay, beatmap, truePlace, latvianTime);
+                }
+                else {
+                  return;
+                }
+              }
+            }).catch(console.error);
+          }
+          else {
+            return;
+          }
+        }
+    }
+  }
+
   if (!message.content.startsWith(config.prefix) || message.author.bot) return;
 
   const prefix = config.prefix;
@@ -241,16 +284,18 @@ client.on("message", (message) => {
     setTimeout(function() {
       osuApi.getUser({u: osulink[i].osu_id})
       .then(user => {
-        let LVRank = parseInt(user.pp.countryRank);
         console.log(`[${moment().format("HH:mm:ss")}] ${user.name} - #${LVRank} LV`);
         console.log(`[${moment().format("HH:mm:ss")}] Pašlaik pārbaudu ${user.name} scorus!`);
+        trackLeaderboardScores(user);
+
+        let LVRank = parseInt(user.pp.countryRank);
         let limits = checkRank(LVRank, osulink, i);
         osuApi.getUserBest({u: osulink[i].osu_id, limit: limits})
         .then(scores => {
           for (let q = 0; q < scores.length; q++) {
             let getdifference = getDifference(scores, q);
-            let difference = getdifference [0];
-            let latvianTime = getdifference [1];
+            let difference = getdifference[0];
+            let latvianTime = getdifference[1];
             if (difference <= 600000) {
               let rank = checkScoreRank(scores, q);
               let delay = getDelay(difference)
