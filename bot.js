@@ -257,7 +257,7 @@ client.on("message", (message) => {
                 if (scores[w].user.id === user.id) {
                   console.log(scores[w].raw_date);
                   console.log(user.events[t].raw_date);
-                  let atskiriba = scores[w].raw_date.diff(user.events[t].raw_date);
+                  let atskiriba = moment(scores[w].raw_date).diff(moment(user.events[t].raw_date));
                   console.log(atskiriba);
                   if (scores[w].raw_date === user.events[t].raw_date) {
                     let truePlace = w + 1;
