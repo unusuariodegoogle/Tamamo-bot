@@ -256,7 +256,9 @@ client.on("message", (message) => {
               for (let w = 0; w < scores.length; w++) {
                 if (scores[w].user.id === user.id) {
                   console.log(scores[w].raw_date);
-                  console.log(user.events[t].raw_date); 
+                  console.log(user.events[t].raw_date);
+                  let atskiriba = scores[w].raw_date.diff(user.events[t].raw_date);
+                  console.log(atskiriba);
                   if (scores[w].raw_date === user.events[t].raw_date) {
                     let truePlace = w + 1;
                     osuApi.getBeatmaps({b: user.events[t].beatmapId})
