@@ -191,6 +191,7 @@ client.on("message", (message) => {
       channel.send(new Discord.RichEmbed()
       .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
       .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
+      .setColor(34047)
       .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** Max:${limits}__ 
   #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
   x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** nomod
@@ -203,6 +204,7 @@ client.on("message", (message) => {
       channel.send(new Discord.RichEmbed()
       .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
       .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
+      .setColor(34047)
       .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** Max:${limits}__
   #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
   x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
@@ -213,14 +215,25 @@ client.on("message", (message) => {
     }
   }
 
-  function postLeaderboardScore(user, delay, beatmap, truePlace, latvianTime) {
+  function getColor(truePlace) {
+    if (truePlace === 1) {
+      return 16751872;
+    }
+    else {
+      return 4472063;
+    }
+  }
+
+  function postLeaderboardScore(user, delay, beatmaps, truePlace, latvianTime) {
     const channel = message.guild.channels.find("name", "botspam");
-    
+    let color = getColor(truePlace);
+
     channel.send(new Discord.RichEmbed()
     .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
-    .setThumbnail(`https://b.ppy.sh/thumb/${beatmap.beatmapSetId}l.jpg`)
-    .setDescription(`ieguva **${truePlace}.** vietu uz
-[${beatmap.artist} - ${beatmap.title} [${beatmap.version}]](https://osu.ppy.sh/b/${beatmap.beatmapId}`)
+    .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].id}l.jpg`)
+    .setColor(color)
+    .setDescription(`ieguva **${truePlace}.**vietu uz
+[${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${beatmaps[0].id})`)
     .setFooter(`${delay} ${moment(latvianTime).format("HH:mm DD/MM/YYYY")}`)
     ).catch(console.error);
   }
@@ -232,27 +245,24 @@ client.on("message", (message) => {
       let latvianTime = getdifference[1];
         if (difference <= 600000) {
           let delay = getDelay(difference);
-          let string = user.events[0].html;
+          let string = user.events[t].html;
           let pos = string.indexOf("#");
           let vieta = string.slice(pos + 1, pos + 4);
           let split = vieta.split("</");
           let place = parseInt(split[0]);
           if (place <= 100) {
             osuApi.getScores({b: user.events[t].beatmapId})
-            .then(scores, beatmap => {
+            .then(scores => {
               for (let w = 0; w < scores.length; w++) {
-                if (scores[w].user_id === user.id) {
+                if (scores[w].user.id === user.id) {
                   let truePlace = w + 1;
-                  postLeaderboardScore(user, delay, beatmap, truePlace, latvianTime);
-                }
-                else {
-                  return;
+                  osuApi.getBeatmaps({b: user.events[t].beatmapId})
+                  .then(beatmaps => {
+                    postLeaderboardScore(user, delay, beatmaps, truePlace, latvianTime);
+                  }).catch(console.error)
                 }
               }
             }).catch(console.error);
-          }
-          else {
-            return;
           }
         }
     }
