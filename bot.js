@@ -230,7 +230,7 @@ client.on("message", (message) => {
 
     channel.send(new Discord.RichEmbed()
     .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
-    .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].id}l.jpg`)
+    .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
     .setColor(color)
     .setDescription(`ieguva **${truePlace}.**vietu uz
 [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${beatmaps[0].id})`)
