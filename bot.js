@@ -255,15 +255,12 @@ client.on("message", (message) => {
             .then(scores => {
               for (let w = 0; w < scores.length; w++) {
                 if (scores[w].user.id === user.id) {
-                  console.log(scores[w].raw_date);
-                  console.log(user.events[t].raw_date);
-                  let atskiriba = moment(scores[w].raw_date).diff(moment(user.events[t].raw_date));
-                  console.log(atskiriba);
-                  if (scores[w].raw_date === user.events[t].raw_date) {
+                  let atskiriba = moment(user.events[t].raw_date).diff(moment(scores[w].raw_date));
+                  if (atskiriba <= 10000) {
                     let truePlace = w + 1;
                     osuApi.getBeatmaps({b: user.events[t].beatmapId})
                     .then(beatmaps => {
-                      //postLeaderboardScore(user, delay, beatmaps, truePlace, latvianTime);
+                      postLeaderboardScore(user, delay, beatmaps, truePlace, latvianTime);
                     }).catch(console.error)
                 }
                 }
