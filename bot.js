@@ -257,7 +257,7 @@ client.on("message", (message) => {
                 if (scores[w].user.id === user.id) {
                   let atskiriba = moment(user.events[t].raw_date).diff(moment(scores[w].raw_date));
                   console.log(atskiriba);
-                  if (atskiriba <= 10000) {
+                  if (atskiriba > 0 && atskiriba <= 10000) {
                     let truePlace = w + 1;
                     osuApi.getBeatmaps({b: user.events[t].beatmapId})
                     .then(beatmaps => {
