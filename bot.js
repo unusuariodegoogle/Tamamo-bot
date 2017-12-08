@@ -189,6 +189,15 @@ client.on("message", (message) => {
     }
   }
 
+  function getApprovalStatus(beatmaps) {
+    if (beatmaps[0].approvalStatus === undefined) {
+      return "Loved";
+    }
+    else {
+      return beatmaps[0].approvalStatus;
+    }
+  }
+
   function postScore(user, scores, beatmaps, limits, rank, accuracy, laiks, bpm, delay, latvianTime, q) {
     let pp = Math.round(scores[q].pp * 100) / 100;
     let totalpp = Math.round(user.pp.raw * 100) / 100;
@@ -235,12 +244,13 @@ ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
     let bpm = ilgumsunbpm[0];
     let laiks = ilgumsunbpm[1];
     let difficulty = Math.round(beatmaps[0].difficulty.rating * 100) / 100;
+    let status = getApprovalStatus(beatmaps);
 
     channel.send(new Discord.RichEmbed()
     .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
     .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
     .setColor(color)
-    .setDescription(`__ieguva **${truePlace}.**vietu **${beatmaps[0].approvalStatus}** mapē:__
+    .setDescription(`__ieguva **${truePlace}.**vietu **${status}** mapē:__
 [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${beatmaps[0].id})
 x${scores[w].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[w].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
 ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
