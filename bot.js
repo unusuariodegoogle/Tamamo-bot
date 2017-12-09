@@ -129,10 +129,10 @@ client.on("message", (message) => {
       else if (scores[q].mods[k] === "HT") {
         return [false, true, false];
       }
-      else {
+      else if (k === (scores[q].mods.length - 1)) {
         return [false, false, true];
       }
-    }
+      }
     }
   }
   
@@ -212,7 +212,7 @@ client.on("message", (message) => {
     .setAuthor(user.name, `https://a.ppy.sh/${user.id}`, `https://osu.ppy.sh/u/${user.id}`)
     .setThumbnail(`https://b.ppy.sh/thumb/${beatmaps[0].beatmapSetId}l.jpg`)
     .setColor(34047)
-    .setDescription(`__**${pp}pp |** #${z + 1} personal best **|** Max:${limits}__ 
+    .setDescription(`__**${pp}pp |** **#${z + 1}** personal best **|** Max:${limits}__ 
 #${parseInt(user.pp.rank).toLocaleString()} **|** #${user.pp.countryRank} ${user.country} **|** ${totalpp.toLocaleString()}pp
 x${scores[q].maxCombo}/${beatmaps[0].maxCombo} **|** ${rank} **|** ${parseInt(scores[q].score).toLocaleString()} **|** ${accuracy}% **|** ${mods}
 [${beatmaps[0].artist} - ${beatmaps[0].title} [${beatmaps[0].version}]](https://osu.ppy.sh/b/${scores[q].beatmapId})
