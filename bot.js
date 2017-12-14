@@ -355,7 +355,7 @@ ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
     }, i * 4000);
     }
   }
-    setInterval(check, 600000);
+    setInterval(check, 660000);
     check();
     return;
   }
