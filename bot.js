@@ -263,7 +263,7 @@ ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
       let getdifference = getDifference(user.events, t);
       let difference = getdifference[0];
       let latvianTime = getdifference[1];
-        if (difference <= 600000) {
+        if (difference <= 660000) {
           let delay = getDelay(difference);
           let string = user.events[t].html;
           let pos = string.indexOf("#");
@@ -333,7 +333,7 @@ ${laiks} **|** ${bpm} BPM **|** ★**${difficulty}**`)
             let getdifference = getDifference(scores, q);
             let difference = getdifference[0];
             let latvianTime = getdifference[1];
-            if (difference <= 600000) {
+            if (difference <= 660000) {
               let rank = checkScoreRank(scores, q);
               let delay = getDelay(difference)
               let modi = checkMods(scores, q);
